@@ -1,0 +1,28 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Microbus</id>
+    <title>Microbus</title>
+    <version>0.0.1</version>
+    <authors>Cameron Fletcher, 
+Microbus contributors</authors>
+    <projectUrl>https://github.com/cameronfletcher/Microbus/wiki</projectUrl>
+    <iconUrl>http://nuget.cameronfletcher.com/icons/Microbus.png</iconUrl>
+    <licenseUrl>https://raw.github.com/cameronfletcher/Microbus/master/LICENSE.mit.txt</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A very lightweight in-memory message bus for .NET</description>
+    <releaseNotes>TBD</releaseNotes>
+    <copyright>Copyright (c) Microbus contributors.</copyright>
+    <tags>micro message bus microbus</tags>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System" targetFramework="net35" />
+      <frameworkAssembly assemblyName="System" targetFramework="net40" />
+      <frameworkAssembly assemblyName="System" targetFramework="net45" />
+    </frameworkAssemblies>
+  </metadata>
+  <files>
+    <file src="Microbus/Microbus.cs" target="content/net35" />
+    <file src="Microbus/Microbus.cs" target="content/net40" />
+    <file src="Microbus/Microbus.cs" target="content/net45" />
+  </files>
+</package>

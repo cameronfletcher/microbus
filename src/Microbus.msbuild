@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="Build">
+
+  <UsingTask AssemblyFile="..\packages\xunit.runner.msbuild.2.1.0\build\portable-net45+win8+wp8+wpa81\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
+  <UsingTask AssemblyFile="..\packages\AssemblyVersion.MSBuild.0.1.0\tools\AssemblyVersion.MSBuild.dll" TaskName="SetAssemblyVersion" />
+
+  <PropertyGroup>
+    <SolutionName>Microbus</SolutionName>
+    <BuildDir>..\build</BuildDir>
+    <Nuget>..\packages\NuGet.CommandLine.2.8.6\tools\NuGet.exe</Nuget>
+    <Flavour Condition=" '$(BranchName)' == 'release' ">beta</Flavour>
+    <Flavour Condition=" '$(BranchName)' == 'master' ">release</Flavour>
+    <Flavour Condition=" '$(Flavour)' == '' ">alpha</Flavour>
+    <NugetPublishUrl Condition=" '$(Flavour)' == 'beta' Or '$(Flavour)' == 'release' ">$(NuGetUrl)</NugetPublishUrl>
+    <NugetPublishUrl Condition=" '$(NugetPublishUrl)' == '' ">$(NuGetDevUrl)</NugetPublishUrl>
+    <NugetPublishApiKey Condition=" '$(Flavour)' == 'beta' Or '$(Flavour)' == 'release' ">$(NugetApiKey)</NugetPublishApiKey>
+    <NugetPublishApiKey Condition=" '$(NugetPublishApiKey)' == '' ">$(NugetDevApiKey)</NugetPublishApiKey>
+  </PropertyGroup>
+
+  <Target Name="PackageRestore">
+    <Exec Command="$(Nuget) restore $(SolutionName).sln -PackagesDirectory &quot;..\packages&quot;" />
+  </Target>
+
+  <Target Name="UpdateVersion">
+    <ReadLinesFromFile File="Version.txt">
+      <Output TaskParameter="Lines" PropertyName="VersionNumber" />
+    </ReadLinesFromFile>
+    <SetAssemblyVersion FileName="CommonAssemblyInfo.cs" VersionNumber="$(VersionNumber)" Flavour="$(Flavour)" BuildNumber="$(BuildNumber)">
+      <Output TaskParameter="SemanticVersion" PropertyName="SemanticVersion" />
+    </SetAssemblyVersion>
+  </Target>
+    
+  <Target Name="Build" DependsOnTargets="UpdateVersion;PackageRestore">
+    <MSBuild Projects="$(SolutionName).sln" Properties="Configuration=Fixed" />
+  </Target>
+
+  <Target Name="CreateBuildDir">
+    <RemoveDir Directories="$(BuildDir)" />
+    <MakeDir Directories="$(BuildDir)" />
+  </Target>
+  
+  <Target Name="Test" DependsOnTargets="Build;CreateBuildDir">
+    <ItemGroup>
+      <TestAssemblies Include="**/bin/**/*.Tests.dll" />
+    </ItemGroup>
+    <Message Text="TestAssemblies: @(TestAssemblies)" />
+    <xunit Assemblies="@(TestAssemblies)" Html="$(BuildDir)\TestResults.html" />
+  </Target>
+
+  <Target Name="Package" DependsOnTargets="CreateBuildDir;UpdateVersion">
+    <Exec Command="$(Nuget) pack $(SolutionName).nuspec -OutputDir &quot;$(BuildDir)&quot; -Version $(SemanticVersion)" />
+  </Target>
+
+  <Target Name="Publish" DependsOnTargets="Package">
+    <Exec Command="$(Nuget) push &quot;$(BuildDir)\$(SolutionName).$(SemanticVersion).nupkg&quot; $(NugetPublishApiKey) -Source $(NugetPublishUrl)" />
+  </Target>
+
+</Project>
