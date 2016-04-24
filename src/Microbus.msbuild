@@ -7,7 +7,7 @@
   <PropertyGroup>
     <SolutionName>Microbus</SolutionName>
     <BuildDir>..\build</BuildDir>
-    <Nuget>..\packages\NuGet.CommandLine.2.8.6\tools\NuGet.exe</Nuget>
+    <Nuget>..\packages\NuGet.CommandLine.3.4.3\tools\NuGet.exe</Nuget>
     <Flavour Condition=" '$(BranchName)' == 'release' ">beta</Flavour>
     <Flavour Condition=" '$(BranchName)' == 'master' ">release</Flavour>
     <Flavour Condition=" '$(Flavour)' == '' ">alpha</Flavour>
