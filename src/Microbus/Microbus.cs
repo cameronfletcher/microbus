@@ -7,8 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Emit;
 
 [assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1636:FileHeaderCopyrightTextMustMatch", Scope = "Module", Justification = "Content is valid.")]
 [assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1641:FileHeaderCompanyNameTextMustMatch", Scope = "Module", Justification = "Content is valid.")]
@@ -104,5 +105,46 @@ internal sealed class Microbus
         {
             throw new InvalidOperationException("The operation has resulted in a cyclic call to this method.");
         }
+    }
+
+    public Microbus AutoRegister(params object[] handlers)
+    {
+        if (handlers == null)
+        {
+            throw new ArgumentNullException("handlers");
+        }
+
+        if (!handlers.Any())
+        {
+            throw new ArgumentException("No handlers specified.", "handlers");
+        }
+
+        if (handlers.Any(handler => handler == null))
+        {
+            throw new ArgumentException("One or more of the specified handlers is null.", "handlers");
+        }
+
+        foreach (var handler in handlers)
+        {
+            handler.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .Where(method => method.GetParameters().Count() == 1)
+                .ToList()
+                .ForEach(
+                    method =>
+                    {
+                        var parameterType = method.GetParameters().First().ParameterType;
+                        var message = Expression.Parameter(parameterType, "message");
+                        var lambda = Expression.Lambda(
+                            typeof(Action<>).MakeGenericType(parameterType),
+                            Expression.Call(Expression.Constant(handler), method, message),
+                            message);
+
+                        typeof(Microbus).GetMethod("Register")
+                            .MakeGenericMethod(parameterType)
+                            .Invoke(this, new object[] { lambda.Compile() });
+                    });
+        }
+
+        return this;
     }
 }
