@@ -11,7 +11,7 @@ Microbus contributors</authors>
     <licenseUrl>https://raw.github.com/cameronfletcher/Microbus/master/LICENSE.mit.txt</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A very lightweight in-memory message bus for .NET</description>
-    <releaseNotes>Initial release</releaseNotes>
+    <releaseNotes>TBD</releaseNotes>
     <copyright>Copyright (c) Microbus contributors.</copyright>
     <tags>micro message bus microbus</tags>
     <frameworkAssemblies>
